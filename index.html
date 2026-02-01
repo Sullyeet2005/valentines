@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>One Quick Question</title>
+
+  <style>
+    :root {
+      --pink: #ff4d6d;
+      --bg1: #ff9a9e;
+      --bg2: #fad0c4;
+      --ink: #222;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .card {
+      width: min(420px, 92vw);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      padding: 34px 26px;
+      border-radius: 22px;
+      text-align: center;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.25);
+      position: relative;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      color: var(--pink);
+      font-size: 30px;
+      letter-spacing: 0.2px;
+    }
+
+    .sub {
+      margin: 0 0 22px;
+      color: #333;
+      font-size: 18px;
+      min-height: 48px;
+      display: grid;
+      place-items: center;
+      padding: 0 8px;
+    }
+
+    .row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      align-items: center;
+      padding-top: 4px;
+      position: relative;
+      height: 64px;
+    }
+
+    button {
+      padding: 12px 18px;
+      font-size: 16px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    #yes {
+      background: var(--pink);
+      color: white;
+      box-shadow: 0 10px 18px rgba(255, 77, 109, 0.35);
+    }
+    #yes:hover { filter: brightness(1.03); }
+
+    #no, .no-clone {
+      background: #d8d8d8;
+      color: #111;
+      position: absolute;
+      left: 240px;
+      top: 8px;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.12);
+    }
+
+    /* Popup */
+    .popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: grid;
+      place-items: center;
+      z-index: 50;
+      padding: 18px;
+    }
+
+    .popup-inner {
+      width: min(360px, 94vw);
+      background: white;
+      border-radius: 16px;
+      padding: 22px 18px;
+      text-align: center;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+      animation: pop 0.25s ease-out;
+    }
+    @keyframes pop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .popup h2 { margin: 0 0 8px; }
+    .popup p { margin: 0 0 14px; }
+
+    /* Toasts */
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 14px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      z-index: 60;
+      animation: toastIn 0.22s ease-out;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px);} to { opacity: 1; transform: translateX(-50%) translateY(0);} }
+
+    /* Screen shake */
+    .shake {
+      animation: shake 0.35s linear;
+    }
+    @keyframes shake {
+      0%,100% { transform: translate(0,0); }
+      10% { transform: translate(-8px, 3px); }
+      20% { transform: translate(7px, -4px); }
+      30% { transform: translate(-6px, -5px); }
+      40% { transform: translate(6px, 6px); }
+      50% { transform: translate(-5px, 4px); }
+      60% { transform: translate(5px, -3px); }
+      70% { transform: translate(-4px, -2px); }
+      80% { transform: translate(3px, 5px); }
+      90% { transform: translate(-2px, -4px); }
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      inset: -10vh 0 0 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 40;
+    }
+    .confetti i {
+      position: absolute;
+      top: -10vh;
+      width: 10px;
+      height: 16px;
+      opacity: 0.95;
+      border-radius: 2px;
+      animation: fall linear forwards;
+      transform: rotate(0deg);
+    }
+    @keyframes fall {
+      to { transform: translateY(120vh) rotate(720deg); opacity: 1; }
+    }
+
+    /* YES screen */
+    .yay {
+      display: grid;
+      gap: 12px;
+      place-items: center;
+    }
+    .yay p {
+      margin: 0;
+      font-size: 18px;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+    .imgs {
+      display: grid;
+      gap: 12px;
+      place-items: center;
+    }
+    .imgs img {
+      width: min(260px, 78vw);
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.2);
+    }
+
+    .bounce {
+      animation: bounce 0.9s infinite ease-in-out;
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .wobble {
+      animation: wobble 1.2s infinite ease-in-out;
+      transform-origin: center;
+    }
+    @keyframes wobble {
+      0%,100% { transform: rotate(-1deg); }
+      50% { transform: rotate(1deg); }
+    }
+
+    .bg-chaos {
+      background: radial-gradient(circle at 30% 20%, #ffd1dc, transparent 45%),
+                  radial-gradient(circle at 70% 30%, #ff7aa2, transparent 45%),
+                  linear-gradient(135deg, #ff9a9e, #fad0c4);
+      animation: pulseBg 1.6s infinite ease-in-out;
+    }
+    @keyframes pulseBg {
+      0%,100% { filter: saturate(1); }
+      50% { filter: saturate(1.2); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="popup" id="popup">
+    <div class="popup-inner">
+      <h2>👀 Hey Aysha</h2>
+      <p><strong>white boy wants to know something real quick…</strong></p>
+      <button id="popupBtn">Okay 😐</button>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <div class="card" id="card">
+    <h1>Aysha 💖</h1>
+    <div class="sub" id="sub">Will you be my Valentine?</div>
+
+    <div class="row" id="row">
+      <button id="yes">Yes 💘</button>
+      <button id="no">No 🙄</button>
+    </div>
+  </div>
+
+  <script>
+    const popup = document.getElementById("popup");
+    const popupBtn = document.getElementById("popupBtn");
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const sub = document.getElementById("sub");
+    const row = document.getElementById("row");
+    const confetti = document.getElementById("confetti");
+
+    let attempts = 0;
+    let noScale = 1;
+    let cloneMade = false;
+    let audioCtx = null;
+
+    const messages = [
+      "Are you sure? 😳",
+      "Aysha… don’t do this 🥲",
+      "Think again 👀",
+      "That’s crazy ngl 💀",
+      "You’re testing me 😤",
+      "Okay now you’re just playing games 💨",
+      "Not allowed ❌",
+      "NOPE 😈",
+      "You literally have no choice now 😂"
+    ];
+
+    const toasts = [
+      "NOPE 💨",
+      "Denied ❌",
+      "Try again 😭",
+      "Nice attempt 💀",
+      "Absolutely not 😈",
+      "Bro… 💨"
+    ];
+
+    function toast(text) {
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = text;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 900);
+    }
+
+    function shake() {
+      document.body.classList.remove("shake");
+      void document.body.offsetWidth;
+      document.body.classList.add("shake");
+      setTimeout(() => document.body.classList.remove("shake"), 380);
+    }
+
+    // ---------- SOUNDS ----------
+    function ensureAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      return audioCtx;
+    }
+
+    // fart-ish (triangle down sweep + noise burst)
+    function playFart() {
+      const ctx = ensureAudio();
+
+      // tone
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(140, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.45);
+
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.9, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.46);
+
+      // noise puff
+      const bufferSize = 2 * ctx.sampleRate;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) output[i] = (Math.random() * 2 - 1) * 0.35;
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = noiseBuffer;
+
+      const ng = ctx.createGain();
+      ng.gain.setValueAtTime(0.0001, ctx.currentTime);
+      ng.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + 0.02);
+      ng.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+
+      noise.connect(ng);
+      ng.connect(ctx.destination);
+      noise.start();
+      noise.stop(ctx.currentTime + 0.2);
+    }
+
+    // airhorn-ish (sawtooth up + down)
+    function playAirhorn() {
+      const ctx = ensureAudio();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(260, ctx.currentTime + 0.35);
+
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.8, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.42);
+    }
+
+    // quick cheer (two tones)
+    function playCheer() {
+      const ctx = ensureAudio();
+      const notes = [440, 660, 880];
+      notes.forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, ctx.currentTime + idx * 0.06);
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime + idx * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + idx * 0.06 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.06 + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.06);
+        osc.stop(ctx.currentTime + idx * 0.06 + 0.13);
+      });
+    }
+
+    // ---------- NO BUTTON CHAOS ----------
+    function moveNoButton(btn) {
+      const card = document.getElementById("card");
+      const rect = card.getBoundingClientRect();
+
+      // bounds inside card
+      const pad = 20;
+      const maxX = rect.width - 110 - pad; // approx button width
+      const maxY = rect.height - 70 - pad;
+
+      const x = pad + Math.random() * Math.max(40, maxX - pad);
+      const y = 120 + Math.random() * Math.max(40, maxY - 120);
+
+      btn.style.left = `${x}px`;
+      btn.style.top = `${y}px`;
+
+      // shrink a bit each time (down to 0.55)
+      noScale = Math.max(0.55, noScale - 0.05);
+      btn.style.transform = `scale(${noScale})`;
+
+      // wobble
+      btn.style.transition = "transform 0.08s ease";
+      setTimeout(() => {
+        btn.style.transform = `scale(${noScale}) rotate(${(Math.random()*12-6).toFixed(2)}deg)`;
+      }, 30);
+    }
+
+    function onNoHover(e) {
+      attempts++;
+
+      playFart();
+      shake();
+      toast(toasts[Math.floor(Math.random() * toasts.length)]);
+
+      sub.textContent = messages[Math.min(attempts - 1, messages.length - 1)];
+
+      // move this button
+      moveNoButton(e.currentTarget);
+
+      // after 5 attempts: spawn a second No button
+      if (attempts >= 5 && !cloneMade) {
+        cloneMade = true;
+        const clone = document.createElement("button");
+        clone.textContent = "No 🙄";
+        clone.className = "no-clone";
+        clone.style.left = "40px";
+        clone.style.top = "210px";
+        row.appendChild(clone);
+
+        clone.addEventListener("mouseover", onNoHover);
+        clone.addEventListener("touchstart", (ev) => { ev.preventDefault(); onNoHover({ currentTarget: clone }); }, { passive: false });
+
+        toast("OH? You found a second NO? 💀");
+      }
+
+      // after 8 attempts: make NO button barely clickable
+      if (attempts >= 8) {
+        sub.textContent = "Okay. Enough. Click YES. 😌";
+      }
+    }
+
+    // mobile: make it run away on touch too
+    function onNoTouch(ev) {
+      ev.preventDefault();
+      onNoHover({ currentTarget: ev.currentTarget });
+    }
+
+    noBtn.addEventListener("mouseover", onNoHover);
+    noBtn.addEventListener("touchstart", onNoTouch, { passive: false });
+
+    // ---------- YES (FINAL) ----------
+    function burstConfetti() {
+      confetti.innerHTML = "";
+      const pieces = 130;
+      for (let i = 0; i < pieces; i++) {
+        const p = document.createElement("i");
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.animationDuration = (1.2 + Math.random() * 1.3) + "s";
+        p.style.animationDelay = (Math.random() * 0.15) + "s";
+        p.style.transform = `rotate(${Math.random() * 360}deg)`;
+        p.style.background = `hsl(${Math.random() * 360}, 90%, 60%)`;
+        p.style.width = (6 + Math.random() * 10) + "px";
+        p.style.height = (10 + Math.random() * 16) + "px";
+        confetti.appendChild(p);
+
+        // different fall speeds
+        p.animate(
+          [
+            { transform: `translateY(-10vh) rotate(0deg)`, opacity: 1 },
+            { transform: `translateY(120vh) rotate(720deg)`, opacity: 1 }
+          ],
+          {
+            duration: (1200 + Math.random() * 1400),
+            easing: "linear",
+            fill: "forwards",
+            delay: (Math.random() * 120)
+          }
+        );
+      }
+      setTimeout(() => confetti.innerHTML = "", 2600);
+    }
+
+    yesBtn.addEventListener("click", () => {
+      // unlock audio on iOS (user gesture)
+      ensureAudio();
+      playAirhorn();
+      setTimeout(playCheer, 120);
+
+      burstConfetti();
+      document.body.classList.add("bg-chaos");
+
+      const card = document.getElementById("card");
+      card.innerHTML = `
+        <div class="yay">
+          <h1>YAY!!! 🎉💖</h1>
+          <p>
+            See you on <strong>16th February</strong> 😌<br/>
+            Get ready by <strong>12!</strong> ⏰
+          </p>
+
+          <div class="imgs">
+            <img src="aysha-emoji.png" class="bounce" alt="Aysha emoji">
+            <div style="font-size:14px; color:#444; margin-top:4px;">This is how I feel rn:</div>
+            <img src="celebration.png" class="wobble" alt="celebration meme">
+          </div>
+
+          <p style="font-size:14px; color:#555; margin-top:8px;">
+            (You made the correct decision 😌)
+          </p>
+        </div>
+      `;
+    });
+
+    // Popup close
+    popupBtn.addEventListener("click", () => {
+      popup.style.display = "none";
+      // tiny welcome toast
+      toast("Answer wisely 😈");
+    });
+
+    // If user taps outside popup
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) {
+        popup.style.display = "none";
+        toast("No backing out 😭");
+      }
+    });
+  </script>
+
+</body>
+</html>
