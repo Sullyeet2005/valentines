@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Important Question</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      position: relative;
+      width: 360px;
+    }
+
+    h1 {
+      color: #ff4d6d;
+    }
+
+    p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #yes {
+      background: #ff4d6d;
+      color: white;
+    }
+
+    #no {
+      background: #ccc;
+      position: absolute;
+      left: 220px;
+      top: 240px;
+    }
+
+    .popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      width: 300px;
+    }
+
+    .celebration-img {
+      width: 200px;
+      margin-top: 15px;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- POPUP -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <h2>👀 Hey Aysha</h2>
+      <p><strong>white boy wants to know something real quick…</strong></p>
+      <button onclick="closePopup()">Okay 😐</button>
+    </div>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card" id="card">
+    <h1>Aysha 💖</h1>
+    <p>Will you be my Valentine?</p>
+    <button id="yes">Yes 💘</button>
+    <button id="no">No 🙄</button>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const card = document.getElementById("card");
+
+    const messages = [
+      "Are you sure? 😳",
+      "Aysha… don’t do this 🥲",
+      "Think carefully 👀",
+      "This is getting disrespectful 💨",
+      "You literally have no choice now 😤"
+    ];
+
+    let msgIndex = 0;
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    function playFart() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(120, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.4);
+
+      gain.gain.setValueAtTime(0.8, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+    }
+
+    noBtn.addEventListener("mouseover", () => {
+      playFart();
+      noBtn.style.left = Math.random() * 220 + "px";
+      noBtn.style.top = Math.random() * 220 + "px";
+
+      if (msgIndex < messages.length) {
+        card.querySelector("p").textContent = messages[msgIndex];
+        msgIndex++;
+      }
+    });
+
+    yesBtn.addEventListener("click", () => {
+      card.innerHTML = `
+        <h1>YAYYYY 🎉💖</h1>
+        <p>
+          See you on <strong>16th February</strong> 😌<br>
+          Get ready by <strong>12!</strong> ⏰
+        </p>
+
+        <img src="aysha-emoji.png" class="celebration-img">
+        <p style="font-size:14px">This is how I feel rn:</p>
+        <img src="celebration.png" class="celebration-img">
+      `;
+    });
+  </script>
+
+</body>
+</html>
